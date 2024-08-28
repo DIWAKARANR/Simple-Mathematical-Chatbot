@@ -1,0 +1,199 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mathematical Chatbot</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #f06, #ff9a9e);
+            color: #fff;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+            animation: backgroundAnimation 10s infinite alternate;
+        }
+
+        @keyframes backgroundAnimation {
+            0% { background: linear-gradient(135deg, #f06, #ff9a9e); }
+            100% { background: linear-gradient(135deg, #ff9a9e, #f06); }
+        }
+
+        #chatbox {
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 10px;
+            width: 400px;
+            max-width: 100%;
+            padding: 20px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+        }
+
+        #chatbox-header {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-align: center;
+            color: #ffeb3b;
+        }
+
+        #chatlog {
+            height: 300px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 10px;
+        }
+
+        .message {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 10px;
+            background: #333;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        .message.user {
+            background: #4caf50;
+            text-align: right;
+            margin-left: 40px;
+        }
+
+        .message.bot {
+            background: #2196f3;
+            text-align: left;
+            margin-right: 40px;
+        }
+
+        input[type="text"] {
+            width: calc(100% - 22px);
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            outline: none;
+            margin-bottom: 10px;
+        }
+
+        button {
+            padding: 10px 15px;
+            border: none;
+            background: #2196f3;
+            color: #fff;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #1976d2;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div id="chatbox">
+        <div id="chatbox-header">Welcome to Chatbot! I will perform mathematical calculations.</div>
+        <div id="chatlog"></div>
+        <input type="text" id="userInput" placeholder="Type your message...">
+        <button onclick="sendMessage()">Send</button>
+    </div>
+
+    <script>
+        function addMessage(text, sender) {
+            const chatlog = document.getElementById('chatlog');
+            const message = document.createElement('div');
+            message.classList.add('message', sender);
+            message.innerText = text;
+            chatlog.appendChild(message);
+            chatlog.scrollTop = chatlog.scrollHeight; // Scroll to the bottom
+        }
+
+        function evaluateExpression(expression) {
+            expression = expression.replace('*', ' * ').replace('/', ' / ').replace('+', ' + ').replace('-', ' - ');
+           
+            try {
+                const tokens = expression.split(' ');
+                if (tokens.length === 3) {
+                    const num1 = parseFloat(tokens[0]);
+                    const operator = tokens[1];
+                    const num2 = parseFloat(tokens[2]);
+                   
+                    if (operator === '+') {
+                        return `The result is ${num1 + num2}`;
+                    } else if (operator === '-') {
+                        return `The result is ${num1 - num2}`;
+                    } else if (operator === '*') {
+                        return `The result is ${num1 * num2}`;
+                    } else if (operator === '/') {
+                        if (num2 !== 0) {
+                            return `The result is ${num1 / num2}`;
+                        } else {
+                            return "Error: Division by zero is not allowed.";
+                        }
+                    } else {
+                        return "Invalid operator. Please use +, -, *, or /.";
+                    }
+                } else {
+                    return "Invalid expression format. Please use two numbers and an operator.";
+                }
+            } catch {
+                return "I'm sorry, I couldn't compute that. Please make sure your input is a valid mathematical expression.";
+            }
+        }
+
+        function chatbotResponse(userInput) {
+            userInput = userInput.toLowerCase();
+           
+            if (/\d+\s*[\+\-\*/]\s*\d+/.test(userInput)) {
+                const expression = userInput.replace(/[^0-9+\-*/.]/g, '');
+                const result = evaluateExpression(expression);
+                return `${result} Thank you! Can I assist you with anything else?`;
+            }
+           
+            if (/hello|hi/.test(userInput)) {
+                return "Hello! I'm a mathematical chatbot. I can perform calculations for you. Just type a math problem like '10 + 5' and I'll solve it for you!";
+            } else if (/how are you/.test(userInput)) {
+                return "I'm just a program, but I'm doing great! How can I assist you with calculations today?";
+            } else if (/bye|goodbye/.test(userInput)) {
+                return "Goodbye! Have a great day!";
+            } else if (/your name/.test(userInput)) {
+                return "I'm a mathematical chatbot created to assist you with calculations.";
+            } else if (/perform.*math/.test(userInput)) {
+                return "Please provide a mathematical expression like '10 + 20' for me to calculate.";
+            } else {
+                return "I'm not sure how to respond to that. Can you ask me something else or try a math calculation?";
+            }
+        }
+
+        function sendMessage() {
+            const userInput = document.getElementById('userInput').value;
+            if (userInput.trim() === '') return;
+
+            addMessage(userInput, 'user');
+
+            const botResponse = chatbotResponse(userInput);
+            addMessage(botResponse, 'bot');
+
+            document.getElementById('userInput').value = '';
+        }
+
+        document.getElementById('userInput').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+    </script>
+</body>
+  </html>
+  
